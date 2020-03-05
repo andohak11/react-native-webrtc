@@ -22,6 +22,22 @@ class MediaDevices extends EventTarget(MEDIA_DEVICES_EVENTS) {
     enumerateDevices() {
         return new Promise(resolve => WebRTCModule.enumerateDevices(resolve));
     }
+	
+	getAudioLevel() {
+        return new Promise(resolve => WebRTCModule.getAudioLevel(resolve));
+	}
+	
+	stopAudioLevel() {
+        return new Promise(resolve => WebRTCModule.stopAudioLevel(resolve));
+	}
+	
+	startVideoRecord(stream_id) {
+        return new Promise(resolve => WebRTCModule.startVideoRecord(stream_id, resolve));
+	}
+	
+	stopVideoRecord(path) {
+        return new Promise(resolve => WebRTCModule.stopVideoRecord(path, resolve));
+	}
 
     /**
      * W3C "Media Capture and Streams" compatible {@code getUserMedia}

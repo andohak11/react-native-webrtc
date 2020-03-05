@@ -1,16 +1,43 @@
 {
-  "name": "react-native-webrtc",
-  "version": "1.69.2",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/react-native-webrtc/react-native-webrtc.git"
+  "_from": "react-native-webrtc",
+  "_id": "react-native-webrtc@1.69.2",
+  "_inBundle": false,
+  "_integrity": "sha512-rnzmteaiKiomZvnYGVC3ZtOLW9v0TPNj9JX47Y6BgabEx74n9YGk77G0hpGlLIsV+mN6nfOZLyfSTCKtlMhnzw==",
+  "_location": "/react-native-webrtc",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "react-native-webrtc",
+    "name": "react-native-webrtc",
+    "escapedName": "react-native-webrtc",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
   },
-  "nativePackage": true,
-  "description": "WebRTC for React Native",
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-native-webrtc/-/react-native-webrtc-1.69.2.tgz",
+  "_shasum": "483cfd831ec7c0b4bcf647ee7d05f64800f1026f",
+  "_spec": "react-native-webrtc",
+  "_where": "C:\\Users\\Dominator\\Desktop\\TestProject",
   "author": {
     "name": "Oney",
     "email": "appdevoney@gmail.com"
   },
+  "bugs": {
+    "url": "https://github.com/react-native-webrtc/react-native-webrtc/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "base64-js": "^1.1.2",
+    "event-target-shim": "^1.0.5",
+    "prop-types": "^15.5.10"
+  },
+  "deprecated": false,
+  "description": "WebRTC for React Native",
   "homepage": "https://github.com/react-native-webrtc/react-native-webrtc",
   "keywords": [
     "react-component",
@@ -19,15 +46,14 @@
     "android",
     "webrtc"
   ],
-  "dependencies": {
-    "base64-js": "^1.1.2",
-    "event-target-shim": "^1.0.5",
-    "prop-types": "^15.5.10"
-  },
+  "name": "react-native-webrtc",
+  "nativePackage": true,
   "peerDependencies": {
     "react-native": ">=0.40.0"
   },
-  "bugs": {
-    "url": "https://github.com/react-native-webrtc/react-native-webrtc/issues"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/react-native-webrtc/react-native-webrtc.git"
+  },
+  "version": "1.69.2"
 }
