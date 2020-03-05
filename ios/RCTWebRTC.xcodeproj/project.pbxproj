@@ -17,6 +17,10 @@
 		35A222701CB493C00015FD5C /* WebRTCModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 35A222451CB493C00015FD5C /* WebRTCModule.m */; };
 		35EC07E61CB73DFE00F3D79C /* RCTConvert+WebRTC.m in Sources */ = {isa = PBXBuildFile; fileRef = 35EC07E51CB73DFE00F3D79C /* RCTConvert+WebRTC.m */; };
 		35EC083A1CB9AEE900F3D79C /* WebRTCModule+RTCDataChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 35EC08391CB9AEE900F3D79C /* WebRTCModule+RTCDataChannel.m */; };
+		84CC0C2422CE640B00DEFF72 /* IDAssetWriterCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 84CC0C1D22CE640A00DEFF72 /* IDAssetWriterCoordinator.m */; };
+		84CC0C2522CE640B00DEFF72 /* IDCaptureSessionCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 84CC0C1E22CE640A00DEFF72 /* IDCaptureSessionCoordinator.m */; };
+		84CC0C2622CE640B00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 84CC0C1F22CE640A00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.m */; };
+		84CC0C2722CE640B00DEFF72 /* IDFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 84CC0C2022CE640A00DEFF72 /* IDFileManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -51,6 +55,14 @@
 		35EC07E51CB73DFE00F3D79C /* RCTConvert+WebRTC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTConvert+WebRTC.m"; sourceTree = "<group>"; };
 		35EC08381CB9AEC400F3D79C /* WebRTCModule+RTCDataChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WebRTCModule+RTCDataChannel.h"; sourceTree = "<group>"; };
 		35EC08391CB9AEE900F3D79C /* WebRTCModule+RTCDataChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "WebRTCModule+RTCDataChannel.m"; sourceTree = "<group>"; };
+		84CC0C1C22CE640A00DEFF72 /* IDAssetWriterCoordinator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDAssetWriterCoordinator.h; sourceTree = "<group>"; };
+		84CC0C1D22CE640A00DEFF72 /* IDAssetWriterCoordinator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IDAssetWriterCoordinator.m; sourceTree = "<group>"; };
+		84CC0C1E22CE640A00DEFF72 /* IDCaptureSessionCoordinator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IDCaptureSessionCoordinator.m; sourceTree = "<group>"; };
+		84CC0C1F22CE640A00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IDCaptureSessionAssetWriterCoordinator.m; sourceTree = "<group>"; };
+		84CC0C2022CE640A00DEFF72 /* IDFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IDFileManager.m; sourceTree = "<group>"; };
+		84CC0C2122CE640A00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDCaptureSessionAssetWriterCoordinator.h; sourceTree = "<group>"; };
+		84CC0C2222CE640A00DEFF72 /* IDFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDFileManager.h; sourceTree = "<group>"; };
+		84CC0C2322CE640A00DEFF72 /* IDCaptureSessionCoordinator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDCaptureSessionCoordinator.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +95,7 @@
 		35A222311CB493C00015FD5C /* RCTWebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				84CC0C1B22CE564500DEFF72 /* VideoRecording */,
 				35EC07E41CB73DBA00F3D79C /* RCTConvert+WebRTC.h */,
 				35EC07E51CB73DFE00F3D79C /* RCTConvert+WebRTC.m */,
 				0BDDA6DE20C17EA400B38B45 /* RTCMediaStreamTrack+React.h */,
@@ -103,6 +116,21 @@
 				35A222451CB493C00015FD5C /* WebRTCModule.m */,
 			);
 			path = RCTWebRTC;
+			sourceTree = "<group>";
+		};
+		84CC0C1B22CE564500DEFF72 /* VideoRecording */ = {
+			isa = PBXGroup;
+			children = (
+				84CC0C1C22CE640A00DEFF72 /* IDAssetWriterCoordinator.h */,
+				84CC0C1D22CE640A00DEFF72 /* IDAssetWriterCoordinator.m */,
+				84CC0C2122CE640A00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.h */,
+				84CC0C1F22CE640A00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.m */,
+				84CC0C2322CE640A00DEFF72 /* IDCaptureSessionCoordinator.h */,
+				84CC0C1E22CE640A00DEFF72 /* IDCaptureSessionCoordinator.m */,
+				84CC0C2222CE640A00DEFF72 /* IDFileManager.h */,
+				84CC0C2022CE640A00DEFF72 /* IDFileManager.m */,
+			);
+			name = VideoRecording;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -161,13 +189,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				35A2226D1CB493C00015FD5C /* WebRTCModule+RTCPeerConnection.m in Sources */,
+				84CC0C2622CE640B00DEFF72 /* IDCaptureSessionAssetWriterCoordinator.m in Sources */,
+				84CC0C2722CE640B00DEFF72 /* IDFileManager.m in Sources */,
 				0B56D000212C12EF00213CEE /* WebRTCModule+VideoTrackAdapter.m in Sources */,
 				35A2226C1CB493C00015FD5C /* WebRTCModule+RTCMediaStream.m in Sources */,
 				0BDDA6E020C18B6B00B38B45 /* VideoCaptureController.m in Sources */,
 				0BDDA6DD20C17E7C00B38B45 /* RTCMediaStreamTrack+React.m in Sources */,
+				84CC0C2422CE640B00DEFF72 /* IDAssetWriterCoordinator.m in Sources */,
 				35A222701CB493C00015FD5C /* WebRTCModule.m in Sources */,
 				35EC07E61CB73DFE00F3D79C /* RCTConvert+WebRTC.m in Sources */,
 				0BC6C06C217F1D54005DCD37 /* WebRTCModule+Permissions.m in Sources */,
+				84CC0C2522CE640B00DEFF72 /* IDCaptureSessionCoordinator.m in Sources */,
 				35EC083A1CB9AEE900F3D79C /* WebRTCModule+RTCDataChannel.m in Sources */,
 				35A222691CB493C00015FD5C /* RTCVideoViewManager.m in Sources */,
 			);

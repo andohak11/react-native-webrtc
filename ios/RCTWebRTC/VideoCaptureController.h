@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 #import <WebRTC/RTCCameraVideoCapturer.h>
+#import <AVFoundation/AVFoundation.h>
 
 @interface VideoCaptureController : NSObject
 
@@ -9,5 +10,7 @@
 -(void)startCapture;
 -(void)stopCapture;
 -(void)switchCamera;
+
+@property (nonatomic, strong) AVCaptureDeviceFormat *selectedFormat;
 
 @end

@@ -14,7 +14,111 @@
 #import "RTCMediaStreamTrack+React.h"
 #import "WebRTCModule+RTCPeerConnection.h"
 
+#import "IDCaptureSessionAssetWriterCoordinator.h"
+#import "IDFileManager.h"
+
+@interface WebRTCModule (RTCMediaStream)<IDCaptureSessionCoordinatorDelegate>
+    //@property (nonatomic, strong)
+@end
+
+
+
 @implementation WebRTCModule (RTCMediaStream)
+
+VideoCaptureController *videoCaptureController;
+RTCCameraVideoCapturer *videoCapturer;
+
+AVCaptureVideoDataOutput *videoOutput;
+IDCaptureSessionCoordinator *captureSessionCoordinator;
+
+RCTResponseSenderBlock _successCallback;
+RCTResponseSenderBlock _errorCallback;
+
+
+#pragma mark - video recording
+
+RCT_EXPORT_METHOD(startVideoRecord:(NSDictionary *)constraints
+                  successCallback:(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseSenderBlock)errorCallback) {
+    
+    NSLog(@"WebRTCModule: startVideoRecord...");
+    
+    _successCallback = successCallback;
+    _errorCallback = errorCallback;
+    
+    //successCallback(@[ @"First: video recording started...", @"Second: video recording started..." ]);
+    //errorCallback(@[ @"DOMException", @"AbortError" ]);
+
+    // NEW
+
+
+    [captureSessionCoordinator startRunning];
+    [captureSessionCoordinator startRecording];
+
+}
+
+RCT_EXPORT_METHOD(stopVideoRecord:(NSDictionary *)constraints
+                  successCallback:(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseSenderBlock)errorCallback) {
+    
+    NSLog(@"WebRTCModule: stopVideoRecord...");
+    
+    _successCallback = successCallback;
+    _errorCallback = errorCallback;
+    
+    [captureSessionCoordinator stopRecording];
+    [captureSessionCoordinator stopRunning];
+
+    //videoOutput = nil;
+    //captureSessionCoordinator = nil;
+    
+    //successCallback(@[ @"Also: video recording stoped...", @"And then: video recording stoped..." ]);
+    //errorCallback(@[ @"DOMException", @"AbortError" ]);
+    
+    
+}
+
+- (void)coordinatorDidBeginRecording:(IDCaptureSessionCoordinator *)coordinator {
+    NSLog(@"coordinatorDidBeginRecording");
+    
+    
+    
+    if (_successCallback){
+        _successCallback(@[ @"coordinatorDidBeginRecording...", @"success" ]);
+        
+        _successCallback = nil;
+        _errorCallback = nil;
+        
+    }
+    
+}
+
+
+- (void)coordinator:(IDCaptureSessionCoordinator *)coordinator didFinishRecordingToOutputFileURL:(NSURL *)outputFileURL error:(NSError *)error {
+    NSLog(@"didFinishRecordingToOutputFileURL");
+    
+    if (error){
+    
+        if (_errorCallback){
+            _errorCallback(@[ @"DOMException", error.localizedDescription ]);
+        }
+        
+    } else {
+        if (_successCallback){
+            _successCallback(@[ @"didFinishRecordingToOutputFileURL...", outputFileURL.path]);
+        }
+    }
+    
+    _successCallback = nil;
+    _errorCallback = nil;
+    
+    // clean up
+    //[captureSessionCoordinator cleanAll];
+    //captureSessionCoordinator = nil;
+
+    
+}
+
 
 #pragma mark - getUserMedia
 
@@ -41,12 +145,29 @@
   RTCVideoTrack *videoTrack = [self.peerConnectionFactory videoTrackWithSource:videoSource trackId:trackUUID];
 
 #if !TARGET_IPHONE_SIMULATOR
-  RTCCameraVideoCapturer *videoCapturer = [[RTCCameraVideoCapturer alloc] initWithDelegate:videoSource];
-  VideoCaptureController *videoCaptureController
-        = [[VideoCaptureController alloc] initWithCapturer:videoCapturer
+  videoCapturer = [[RTCCameraVideoCapturer alloc] initWithDelegate:videoSource];
+
+  videoCaptureController   = [[VideoCaptureController alloc] initWithCapturer:videoCapturer
                                             andConstraints:constraints[@"video"]];
   videoTrack.videoCaptureController = videoCaptureController;
   [videoCaptureController startCapture];
+    
+    
+    // VIDEO RECORDING
+  captureSessionCoordinator = [IDCaptureSessionAssetWriterCoordinator new];
+    
+  NSLog(@"GET OUTPUTS: %@", videoCapturer.captureSession.outputs);
+    for(id element in videoCapturer.captureSession.outputs)
+        if ([element isKindOfClass:[AVCaptureVideoDataOutput class]]){
+            AVCaptureVideoDataOutput *videoOutput = (AVCaptureVideoDataOutput *)element;
+            IDCaptureSessionAssetWriterCoordinator *oldVideoDataOutput = (IDCaptureSessionAssetWriterCoordinator *)captureSessionCoordinator;
+            [oldVideoDataOutput addVideoDataOutputExplicit:videoOutput];
+        }
+    
+    [captureSessionCoordinator setDelegate:self callbackQueue:dispatch_get_main_queue()];
+    [captureSessionCoordinator setupVideoByFormat:videoCaptureController.selectedFormat];
+
+    
 #endif
 
   return videoTrack;
@@ -226,5 +347,6 @@ RCT_EXPORT_METHOD(mediaStreamTrackStop:(nonnull NSString *)trackID)
     [self.localTracks removeObjectForKey:trackID];
   }
 }
+
 
 @end

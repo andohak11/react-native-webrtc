@@ -9,7 +9,7 @@ static int DEFAULT_FPS    = 30;
 @implementation VideoCaptureController {
     RTCCameraVideoCapturer *_capturer;
     NSString *_sourceId;
-    BOOL _usingFrontCamera;
+    BOOL _usingFrontCamera;    
 }
 
 -(instancetype)initWithCapturer:(RTCCameraVideoCapturer *)capturer
@@ -18,6 +18,8 @@ static int DEFAULT_FPS    = 30;
     if (self) {
         _capturer = capturer;
 
+    
+        
         // Default to the front camera.
         _usingFrontCamera = YES;
 
@@ -82,7 +84,8 @@ static int DEFAULT_FPS    = 30;
 
     // TODO: Extract fps from constraints.
     [_capturer startCaptureWithDevice:device format:format fps:DEFAULT_FPS];
-
+    _selectedFormat = format;
+    
     NSLog(@"[VideoCaptureController] Capture started");
 }
 

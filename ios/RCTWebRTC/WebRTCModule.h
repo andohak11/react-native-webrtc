@@ -9,6 +9,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #import <React/RCTConvert.h>
 
 #import <WebRTC/RTCMediaStream.h>
@@ -18,7 +19,7 @@
 #import <WebRTC/RTCVideoTrack.h>
 #import <WebRTC/RTCVideoCodecFactory.h>
 
-@interface WebRTCModule : NSObject <RCTBridgeModule>
+@interface WebRTCModule : RCTEventEmitter <RCTBridgeModule>
 
 @property (nonatomic, strong) RTCPeerConnectionFactory *peerConnectionFactory;
 
