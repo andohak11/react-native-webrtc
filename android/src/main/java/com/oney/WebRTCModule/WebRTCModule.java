@@ -1,9 +1,38 @@
 package com.oney.WebRTCModule;
 
+import android.Manifest;
+import android.app.ActionBar;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+import android.hardware.Camera;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.CamcorderProfile;
+import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
+import android.media.MediaRecorder;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
+import com.coremedia.iso.boxes.Container;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -13,16 +42,32 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.googlecode.mp4parser.FileDataSourceImpl;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
+import com.googlecode.mp4parser.authoring.tracks.AACTrackImpl;
+import com.googlecode.mp4parser.authoring.tracks.h264.H264TrackImpl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.webrtc.*;
+import org.webrtc.audio.JavaAudioDeviceModule;
 
 @ReactModule(name = "WebRTCModule")
 public class WebRTCModule extends ReactContextBaseJavaModule {
@@ -31,6 +76,14 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
     PeerConnectionFactory mFactory;
     private final SparseArray<PeerConnectionObserver> mPeerConnectionObservers;
     final Map<String, MediaStream> localStreams;
+
+    private static AudioRecord audioRecorder = null;
+    boolean isAudiolevel = false;
+    int imageIndex = 0;
+    boolean isRecording = false;
+    long recordStart;
+    MyRecorder recorder;
+
 
     /**
      * The implementation of {@code getUserMedia} extracted into a separate file
@@ -540,6 +593,237 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
     public void enumerateDevices(Callback callback) {
         ThreadUtils.runOnExecutor(() ->
             callback.invoke(getUserMediaImpl.enumerateDevices()));
+    }
+
+    @ReactMethod
+    public void startVideoRecord(String stream_id, Callback callback) {
+        if (ActivityCompat.checkSelfPermission(getCurrentActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 0);
+        }
+
+        Log.d("d666", stream_id);
+
+        imageIndex = 0;
+        isRecording = true;
+        recordStart = System.currentTimeMillis();
+
+        final String path2 = "/storage/emulated/0/test.mp4";
+        Handler mainHandler = new Handler(getReactApplicationContext().getMainLooper());
+
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                WebRTCView wrv = new WebRTCView(getReactApplicationContext());
+                getCurrentActivity().addContentView((View)wrv, new RelativeLayout.LayoutParams( RelativeLayout.LayoutParams.MATCH_PARENT , RelativeLayout.LayoutParams.MATCH_PARENT ));
+                wrv.setVisibility(View.GONE);
+                wrv.setStreamURL(stream_id);
+
+                wrv.setVisibility(View.INVISIBLE);
+
+                SurfaceViewRenderer svr = (SurfaceViewRenderer) wrv.getSurfaceViewRenderer();
+
+                EglRenderer.FrameListener frameListener = new EglRenderer.FrameListener() {
+                    @Override
+                    public void onFrame(Bitmap bitmap) {
+                        new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp").mkdirs();
+                        FileOutputStream fos = null;
+                        try {
+                            fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + imageIndex + ".jpg"));
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+                        //bm.compressToJpeg(new Rect(0, 0, bm.getWidth(), bm.getHeight()), 80, fos);
+                        try {
+                            fos.flush();
+                            fos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        Log.d("d666", "onframe image saved");
+
+                        imageIndex++;
+
+                        if(!isRecording) {
+                            return;
+                        }
+
+                        svr.addFrameListener(this, 1.0f);
+                    }
+                };
+
+                svr.addFrameListener(frameListener, 1.0f);
+
+            }
+        };
+        mainHandler.post(myRunnable);
+
+        new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp").mkdirs();
+        recorder = new MyRecorder(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "tmp_audio.aac");
+
+        WritableArray array = Arguments.createArray();
+        array.pushString("recording");
+
+        ThreadUtils.runOnExecutor(() ->
+                callback.invoke(array));
+    }
+
+    @ReactMethod
+    public void stopVideoRecord(String filename, Callback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                isRecording = false;
+
+                Log.d("d666", "record stop");
+                recorder.stop();
+
+                new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc").mkdirs();
+
+                final String path = Environment.getExternalStorageDirectory() + File.separator
+                        + "Webrtc" + File.separator + filename + ".mp4";
+
+
+                double fps = imageIndex / ((System.currentTimeMillis() - recordStart) / 1000.0);
+
+
+                BitmapToVideoEncoder encoder = new BitmapToVideoEncoder(new BitmapToVideoEncoder.IBitmapToVideoEncoderCallback() {
+                    @Override
+                    public void onEncodingComplete(File outputFile) {
+
+                        Log.d("d666", "video encoding finished");
+
+                        try {
+                            Movie video = MovieCreator.build(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "tmp_video.mp4");
+                            AACTrackImpl aacTrack = new AACTrackImpl(new FileDataSourceImpl(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "tmp_audio.aac"));
+
+                            video.addTrack(aacTrack);
+
+                            Container mp4file = new DefaultMp4Builder().build(video);
+
+                            FileChannel fc = new FileOutputStream(new File(path)).getChannel();
+                            mp4file.writeContainer(fc);
+                            fc.close();
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "tmp_video.mp4").delete();
+                        new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "tmp_audio.aac").delete();
+                        new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp").delete();
+
+                        Log.d("d666", "video saving finished");
+
+                        WritableArray array = Arguments.createArray();
+                        array.pushString("finished");
+
+                        ThreadUtils.runOnExecutor(() ->
+                                callback.invoke(array));
+                    }
+                });
+
+                Bitmap ff = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "0" + ".jpg");
+                int width = ff.getWidth();
+                int height = ff.getHeight();
+                encoder.startEncoding(width, height, new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + "tmp_video.mp4"), fps);
+
+                for(int i = 0; i < imageIndex; i++) {
+                    Bitmap bim = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + (i) + ".jpg");
+
+                    if(bim == null) {continue;}
+
+                    encoder.queueFrame(bim);
+                    Log.d("d666", "encoded " + i + "/" + imageIndex);
+
+                    while(encoder.queueSize() >= 10) {
+                        try {
+                            Thread.sleep(30);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    new File(Environment.getExternalStorageDirectory() + File.separator + "Webrtc" + File.separator + "tmp" + File.separator + i + ".jpg").delete();
+                }
+
+                encoder.stopEncoding();
+            }
+        }).start();
+
+    }
+
+    @ReactMethod
+    public void getAudioLevel(Callback callback) {
+
+        isAudiolevel = true;
+
+        if(audioRecorder == null) {
+            int sampleRate = 8000;
+            int channelConfig = AudioFormat.CHANNEL_IN_MONO;
+            int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+
+            int bfsz = 8192;
+
+            int minInternalBufferSize = AudioRecord.getMinBufferSize(sampleRate,
+                    channelConfig, audioFormat);
+            int internalBufferSize = minInternalBufferSize * 4;
+            Log.d(TAG, "minInternalBufferSize = " + minInternalBufferSize
+                    + ", internalBufferSize = " + internalBufferSize
+                    + ", myBufferSize = " + bfsz);
+
+            audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                    sampleRate, channelConfig, audioFormat, internalBufferSize);
+
+            audioRecorder.startRecording();
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (audioRecorder == null)
+                    return;
+
+                short[] myBuffer = new short[2048];
+
+                while(isAudiolevel) {
+
+                    int readCount = audioRecorder.read(myBuffer, 0, 2048);
+
+                    int middle = 0;
+
+                    for (int i = 0; i < readCount; i++) {
+                        middle += Math.abs(myBuffer[i]);
+                    }
+
+                    middle /= readCount;
+
+                    WritableArray array = Arguments.createArray();
+                    array.pushInt(middle);
+                    array.pushInt(readCount);
+
+                    /*ThreadUtils.runOnExecutor(() ->
+                            callback.invoke(array));*/
+
+                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("audioLevelUpdated", array);
+                }
+
+                audioRecorder.stop();
+                audioRecorder = null;
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void stopAudioLevel(Callback callback) {
+        isAudiolevel = false;
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @ReactMethod

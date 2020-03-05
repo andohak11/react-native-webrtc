@@ -173,6 +173,12 @@ public class WebRTCView extends ViewGroup {
 
         setMirror(false);
         setScalingType(DEFAULT_SCALING_TYPE);
+
+
+    }
+
+    public SurfaceViewRenderer getSurfaceViewRenderer() {
+        return surfaceViewRenderer;
     }
 
     /**
@@ -603,4 +609,5 @@ public class WebRTCView extends ViewGroup {
             rendererAttached = true;
         }
     }
+
 }
